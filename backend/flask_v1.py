@@ -5,8 +5,10 @@ import os
 import json
 import sqlite3
 import email
+import flask_cors
 
 app = Flask(__name__)
+flask_cors.CORS(app)
 client = docker.from_env()
 
 BASE_EMAIL = "base@localhost"
