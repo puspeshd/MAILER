@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_BASE_URL = 'http://localhost:5000/';
+const API_BASE_URL = 'http://43.230.201.125:5000/';
 
 function Modal({ children, onClose }) {
   return (
