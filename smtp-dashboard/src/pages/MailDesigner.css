@@ -1,0 +1,42 @@
+.mail-designer {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.designer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.btn-save {
+  background: #4caf50;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.template-list {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.template-btn {
+  background: #e0e0e0;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.editor-container {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+}

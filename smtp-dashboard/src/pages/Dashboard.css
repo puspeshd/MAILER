@@ -1,0 +1,222 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-container {
+  max-width: auto;
+  margin: 2rem auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 12px;
+}
+
+h1, h2, h3 {
+  color: #222;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+button {
+  background-color: #4a90e2;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.3s ease;
+}
+
+button:disabled {
+  background-color: #a1caff;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #2e6ccf;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  margin-bottom: 20px;
+}
+
+.table thead tr {
+  background-color: #4a90e2;
+  color: white;
+  text-align: left;
+  font-weight: 700;
+}
+
+.table thead th {
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.table tbody tr {
+  background: #8383f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+  color: white;
+  font-weight: bolder;
+}
+
+.table tbody tr:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table tbody td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-weight: 600;
+  margin: 10px 0;
+}
+
+.log-panel {
+  background-color: #1e1e2f;
+  color: #d3e5a0;
+  padding: 16px;
+  border-radius: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  height: 350px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+}
+
+.stats-section {
+  margin-bottom: 20px;
+  background-color: #f0f4f9;
+  padding: 12px;
+  border-radius: 8px;
+}
+.modal-overlay {
+  position: fixed; /* important: covers the entire screen */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(30, 30, 30, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 50px;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #f0f2f5;
+  color: #222;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* smooth fade-in for modal */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+  position: absolute; /* should be inside modal, not fixed */
+  top: 12px;
+  right: 12px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.section-header {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 20px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header span {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  margin-left: 8px;
+  color: #888;
+}
+
+.section-content {
+  background: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  box-shadow: inset 0 3px 10px rgba(0,0,0,0.12);
+  max-height: 280px;
+  overflow-y: auto;
+  transition: max-height 0.25s ease-out;
+}
