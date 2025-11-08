@@ -19,6 +19,7 @@ DB_PATH = 'email_logs.db'
 def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
+        # Existing email_logs table
         c.execute('''
             CREATE TABLE IF NOT EXISTS email_logs (
                 container_id TEXT,
@@ -27,28 +28,50 @@ def init_db():
                 status TEXT,
                 timestamp REAL,
                 body_snippet TEXT,
+                body_html TEXT,
                 PRIMARY KEY (container_id, recipient, subject, timestamp)
+            )
+        ''')
+
+        # Ensure column exists (for backwards compatibility)
+        try:
+            c.execute("ALTER TABLE email_logs ADD COLUMN body_html TEXT")
+        except sqlite3.OperationalError:
+            pass  # already exists
+
+        # Email templates table
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS email_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE,
+                design_json TEXT,
+                html TEXT,
+                created_at REAL
             )
         ''')
         conn.commit()
 
+
+init_db()
 def save_email_logs_to_db(container_id, logs):
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
         for record in logs:
             c.execute('''
                 INSERT OR REPLACE INTO email_logs
-                (container_id, recipient, subject, status, timestamp, body_snippet)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (container_id, recipient, subject, status, timestamp, body_snippet, body_html)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (
                 container_id,
                 record.get('to'),
                 record.get('subject'),
                 record.get('status'),
                 record.get('timestamp'),
-                record.get('body_snippet')[:300] if record.get('body_snippet') else ''
+                record.get('body_snippet') or '',
+                record.get('body_html') or ''
             ))
         conn.commit()
+
 
 def get_email_logs_from_db(container_id):
     with sqlite3.connect(DB_PATH) as conn:
@@ -67,7 +90,6 @@ def get_email_logs_from_db(container_id):
         ]
 
 def parse_mail_content(raw_content):
-    # Parse raw email content to extract headers and snippet
     msg = email.message_from_bytes(raw_content)
     mail_info = {
         'from': msg.get('From'),
@@ -75,17 +97,65 @@ def parse_mail_content(raw_content):
         'subject': msg.get('Subject'),
         'date': msg.get('Date'),
         'body_snippet': '',
-        'status': 'success'  # default to success, adjust if needed
+        'body_html': '',
+        'status': 'success'
     }
+
     if msg.is_multipart():
         for part in msg.walk():
             ctype = part.get_content_type()
-            if ctype == 'text/plain':
+            if ctype == 'text/html':
+                mail_info['body_html'] = part.get_payload(decode=True).decode(errors='ignore')
+            elif ctype == 'text/plain' and not mail_info['body_snippet']:
                 mail_info['body_snippet'] = part.get_payload(decode=True)[:100].decode(errors='ignore')
-                break
     else:
-        mail_info['body_snippet'] = msg.get_payload(decode=True)[:100].decode(errors='ignore')
+        ctype = msg.get_content_type()
+        payload = msg.get_payload(decode=True)
+        if ctype == 'text/html':
+            mail_info['body_html'] = payload.decode(errors='ignore')
+            mail_info['body_snippet'] = mail_info['body_html'][:100]
+        else:
+            mail_info['body_snippet'] = payload[:100].decode(errors='ignore')
+
     return mail_info
+
+
+
+@app.route("/mails", methods=["GET"])
+def get_mails():
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("SELECT id, name, html, design_json FROM email_templates")
+        rows = c.fetchall()
+        return jsonify([
+            {
+                "id": str(r[0]),
+                "name": r[1],
+                "html": r[2],
+                "design": json.loads(r[3]) if r[3] else {}
+            }
+            for r in rows
+        ])
+
+
+
+@app.route("/mails", methods=["POST"])
+def save_mail():
+    data = request.json
+    print("Received data:", data)  # Debug line
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute(
+                "INSERT OR REPLACE INTO email_templates (name, html, design_json, created_at) VALUES (?, ?, ?, ?)",
+                (data.get("name"), data.get("html"), json.dumps(data.get("design")), time.time())
+            )
+            conn.commit()
+        return jsonify({"status": "saved"}), 201
+    except Exception as e:
+        print("Error saving mail:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/containers/maildata/<container_name>', methods=['GET'])
@@ -202,10 +272,25 @@ def container_stats(container_id):
 @app.route('/containers/emails/<container_id>', methods=['GET'])
 def container_email_logs(container_id):
     try:
-        logs = get_email_logs_from_db(container_id)
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute('SELECT recipient, subject, status, timestamp, body_snippet, body_html FROM email_logs WHERE container_id = ? ORDER BY timestamp DESC', (container_id,))
+            rows = c.fetchall()
+        logs = [
+            {
+                "to": r[0],
+                "subject": r[1],
+                "status": r[2],
+                "timestamp": r[3],
+                "body_snippet": r[4],
+                "body_html": r[5]
+            }
+            for r in rows
+        ]
         return jsonify(logs)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/containers/send-emails/<container_id>', methods=['POST'])
