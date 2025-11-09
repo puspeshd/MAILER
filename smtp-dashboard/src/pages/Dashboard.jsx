@@ -167,7 +167,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h1>SMTP Docker Dashboard</h1>
+      <h1>CONTROLLER DASHBOARD</h1>
 
       <button disabled={loading || sendLoading} onClick={createContainer} className="btn">
         {loading ? "Creating..." : "Create New SMTP Container"}
@@ -175,7 +175,7 @@ export default function Dashboard() {
 
       {errorMsg && <p className="error-message">{errorMsg}</p>}
 
-      <h2>Containers</h2>
+     
       <table className="table">
         <thead>
           <tr>
@@ -183,7 +183,7 @@ export default function Dashboard() {
             <th>Status</th>
             <th>Base Email</th>
             <th>User Count</th>
-            <th>Uptime (sec)</th>
+            <th>Uptime (min)</th>
             <th>Emails Sent</th>
             <th>Actions</th>
           </tr>
@@ -202,7 +202,7 @@ export default function Dashboard() {
                 <td>{c.status}</td>
                 <td>{c.base_email}</td>
                 <td>{c.user_count}</td>
-                <td>{c.uptime_seconds}</td>
+                <td>{Math.floor(c.uptime_seconds/60)}</td>
                 <td>{c.emails_sent}</td>
                 <td>
                   <button onClick={() => viewLogs(c.id)} className="btn">View Logs</button>

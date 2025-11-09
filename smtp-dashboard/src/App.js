@@ -10,17 +10,17 @@ export default function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <h1>Mail System</h1>
+        
         <nav>
           <button
             onClick={() => navigate("/")}
-            className="nav-btn"
+            className="nav-button"
           >
             Dashboard
           </button>
           <button
             onClick={() => navigate("/designer")}
-            className="nav-btn"
+            className="nav-button"
           >
             Mail Designer
           </button>
