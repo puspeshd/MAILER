@@ -6,6 +6,7 @@ import json
 import sqlite3
 import email
 import flask_cors
+import requests
 
 app = Flask(__name__)
 flask_cors.CORS(app)
@@ -323,7 +324,36 @@ def get_uptime(container):
     start_time = time.strptime(started_at.split('.')[0], "%Y-%m-%dT%H:%M:%S")
     start_epoch = time.mktime(start_time)
     return int(time.time() - start_epoch)
+SERVER = "https://puspeshd.pythonanywhere.com"
 
+@app.route("/generate", methods=["POST"])
+def generate():
+    """Frontend → Local Flask → PythonAnywhere → Colab → back"""
+    data = request.json
+    prompt = data.get("prompt")
+    if not prompt:
+        return jsonify({"error": "Missing prompt"}), 400
+
+    try:
+        # Send the prompt to the central server
+        requests.post(f"{SERVER}/send_prompt", json={"prompt": prompt})
+        print(f"✅ Sent prompt: {prompt}")
+
+        # Poll for result until it's ready
+        while True:
+            res = requests.get(f"{SERVER}/get_result").json()
+            if res.get("result") != "pending":
+                print("✅ Got response from model")
+                print(res.get('result'))
+                try:
+                    result_final = res.get('result',"").replace(prompt,"")
+                except:
+                    pass
+                return jsonify({"result": result_final})
+            time.sleep(3)
+    except Exception as e:
+        print("❌ Error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     init_db()
